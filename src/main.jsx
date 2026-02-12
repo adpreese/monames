@@ -4,7 +4,7 @@ import App from './App.jsx';
 
 const root = createRoot(document.getElementById('root'));
 root.render(
-  <BrowserRouter>
-    <App />
+  <BrowserRouter basename={routerBase}>
+      <App />
   </BrowserRouter>
 );
