@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
 
 const root = createRoot(document.getElementById('root'));
+const routerBase = import.meta.env.BASE_URL.replace(/\/dist\/?$/, '/');
+
 root.render(
   <BrowserRouter basename={routerBase}>
       <App />
