@@ -1019,7 +1019,7 @@ const App = () => {
     <div className="app">
       <header className="app-header">
         <div>
-          <h1><img src="/favicon.png" alt="Monames icon" style={{ width: '32px', height: '32px', marginRight: '8px', verticalAlign: 'middle' }} />Monames</h1>
+          <h1><img src="%BASE_URL%favicon.png" alt="Monames icon" style={{ width: '32px', height: '32px', marginRight: '8px', verticalAlign: 'middle' }} />Monames</h1>
         </div>
         <nav className="app-nav">
           <NavLink className="nav-link" to="/">
