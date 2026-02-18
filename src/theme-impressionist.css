@@ -1,0 +1,113 @@
+:root.theme-impressionist {
+  color-scheme: light dark;
+  --c1: #cfe7e3;
+  --c2: #f6d6a8;
+  --c3: #9bb7d9;
+  --c4: #d7a7b8;
+  --c5: #9fc7a3;
+  --grain-opacity: 0.85;
+  --brush-opacity: 0;
+  --grain-scale: 240px;
+  --brush-scale: 0px;
+  --saturate: 1.12;
+  --contrast: 1.08;
+  --brightness: 1.02;
+  --bg: #f6efe4;
+  --panel: #fff8ef;
+  --text: #2f2a24;
+  --muted: #6f5e52;
+  --border: #dccbb7;
+  --accent: #d0714c;
+  --team-red: #d96b5c;
+  --team-blue: #4f78c7;
+  --team-neutral: #dccbb7;
+  --team-assassin: #2c2b2a;
+  --wash-rose: rgba(221, 134, 126, 0.35);
+  --wash-gold: rgba(235, 192, 136, 0.3);
+  --wash-sky: rgba(140, 180, 220, 0.3);
+  --wash-lilac: rgba(174, 150, 210, 0.25);
+}
+
+:root.theme-impressionist[data-theme='dark'] {
+  color-scheme: dark;
+  --c1: #1f2428;
+  --c2: #3a2b1a;
+  --c3: #1f2a3a;
+  --c4: #2e2228;
+  --c5: #23302a;
+  --grain-opacity: 0.55;
+  --brush-opacity: 0;
+  --grain-scale: 240px;
+  --brush-scale: 0px;
+  --saturate: 1.05;
+  --contrast: 1.05;
+  --brightness: 0.9;
+  --bg: #17161b;
+  --panel: #1f1c23;
+  --text: #f5eee6;
+  --muted: #c4b4a5;
+  --border: #3b3129;
+  --accent: #f0a36a;
+  --team-red: #e28478;
+  --team-blue: #7fa3e6;
+  --team-neutral: #51453b;
+  --team-assassin: #050505;
+  --wash-rose: rgba(214, 120, 110, 0.25);
+  --wash-gold: rgba(197, 146, 86, 0.25);
+  --wash-sky: rgba(108, 154, 214, 0.23);
+  --wash-lilac: rgba(149, 118, 190, 0.2);
+}
+
+:root.theme-impressionist,
+:root.theme-impressionist body {
+  min-height: 100%;
+  background-color: var(--c1);
+}
+
+:root.theme-impressionist body {
+  position: relative;
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 800px at 20% 30%, color-mix(in oklab, var(--c2) 70%, white 30%), transparent 60%),
+    radial-gradient(900px 700px at 70% 25%, color-mix(in oklab, var(--c3) 70%, white 30%), transparent 60%),
+    radial-gradient(1100px 900px at 60% 75%, color-mix(in oklab, var(--c5) 65%, white 35%), transparent 60%),
+    radial-gradient(900px 700px at 25% 80%, color-mix(in oklab, var(--c4) 55%, white 45%), transparent 65%),
+    repeating-linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--c1) 92%, white 8%) 0 120px,
+      color-mix(in oklab, var(--c1) 84%, white 16%) 120px 240px
+    ),
+    linear-gradient(135deg, var(--c1), #f7efe2);
+  background-position: center;
+  background-size: 140% 140%, 140% 140%, 140% 140%, 140% 140%, auto, auto;
+  background-attachment: fixed;
+  filter: saturate(var(--saturate)) contrast(var(--contrast)) brightness(var(--brightness));
+}
+
+:root.theme-impressionist[data-theme='dark'],
+:root.theme-impressionist[data-theme='dark'] body {
+  background-color: var(--c1);
+}
+
+:root.theme-impressionist[data-theme='dark'] body {
+  background:
+    radial-gradient(1200px 800px at 20% 30%, color-mix(in oklab, var(--c2) 70%, black 30%), transparent 60%),
+    radial-gradient(900px 700px at 70% 25%, color-mix(in oklab, var(--c3) 70%, black 30%), transparent 60%),
+    radial-gradient(1100px 900px at 60% 75%, color-mix(in oklab, var(--c5) 65%, black 35%), transparent 60%),
+    radial-gradient(900px 700px at 25% 80%, color-mix(in oklab, var(--c4) 55%, black 45%), transparent 65%),
+    repeating-linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--c1) 80%, black 20%) 0 120px,
+      color-mix(in oklab, var(--c1) 70%, black 30%) 120px 240px
+    ),
+    linear-gradient(135deg, var(--c1), #0e0c12);
+  background-position: center;
+  background-size: 140% 140%, 140% 140%, 140% 140%, 140% 140%, auto, auto;
+  background-attachment: fixed;
+  filter: saturate(var(--saturate)) contrast(var(--contrast)) brightness(var(--brightness));
+}
+
+:root.theme-impressionist .app {
+  position: relative;
+  z-index: 1;
+}
