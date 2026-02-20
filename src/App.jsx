@@ -163,17 +163,13 @@ const App = () => {
   const [isBusy, setIsBusy] = useState(false);
   const [clueWord, setClueWord] = useState('');
   const [clueCount, setClueCount] = useState('');
-  const [lastClaudeResult, setLastClaudeResult] = useState(
-    storedState?.lastClaudeResult ?? null
-  );
   const [claudeResponseLog, setClaudeResponseLog] = useState(
     storedState?.claudeResponseLog ?? []
   );
   const [pendingClaudeGuesser, setPendingClaudeGuesser] = useState(false);
-  const [claudeNotesVisible, setClaudeNotesVisible] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState(null);
   const [guessProgress, setGuessProgress] = useState(null);
-  const [jsonParseError, setJsonParseError] = useState(null);
+  const [askAiClueClicked, setAskAiClueClicked] = useState(false);
   const claudeGuessSequenceRef = useRef(0);
   const gameRef = useRef(game);
 
@@ -219,7 +215,6 @@ const App = () => {
       selectedPersonas,
       roleControl,
       game,
-      lastClaudeResult,
       claudeResponseLog
     };
     const timeoutId = setTimeout(() => {
@@ -233,7 +228,6 @@ const App = () => {
     claudeResponseLog,
     customPacks,
     game,
-    lastClaudeResult,
     personas,
     roleControl,
     selectedPackId,
@@ -273,10 +267,6 @@ const App = () => {
       )
     );
   }, [personas, selectedPersonas]);
-
-  useEffect(() => {
-    setClaudeNotesVisible(false);
-  }, [lastClaudeResult]);
 
   const cancelClaudeGuessSequence = useCallback(() => {
     claudeGuessSequenceRef.current += 1;
@@ -476,7 +466,6 @@ const App = () => {
       claudeNotesLog: [],
       endState: null
     });
-    setLastClaudeResult(null);
   };
 
   const saveCustomPack = (packData) => {
@@ -761,12 +750,6 @@ const App = () => {
         throw new Error('Fake AI response could not be parsed.');
       }
       const statusOverride = applyClaudeUpdate(parsed, team, role, 'fake');
-      setLastClaudeResult({
-        team,
-        role,
-        source: 'fake',
-        payload: parsed
-      });
       setStatusMessage(statusOverride ?? 'Fake AI response applied.');
     } catch (error) {
       console.error(error);
@@ -790,7 +773,6 @@ const App = () => {
 
     setIsBusy(true);
     setStatusMessage(`Contacting your AI for ${team} ${ROLE_LABELS[role]}...`);
-    setJsonParseError(null);
 
     try {
       // Use apiConfigOverride if provided, otherwise use the current apiConfig
@@ -816,22 +798,10 @@ const App = () => {
       ]);
 
       if (!parsed) {
-        setJsonParseError({
-          team,
-          role,
-          currentTemperature: Number.parseFloat(apiConfig.temperature) || 0.2,
-          messageText
-        });
         throw new Error('AI response did not include JSON.');
       }
 
       const statusOverride = applyClaudeUpdate(parsed, team, role);
-      setLastClaudeResult({
-        team,
-        role,
-        source: 'claude',
-        payload: parsed
-      });
       setStatusMessage(statusOverride ?? 'AI response applied.');
     } catch (error) {
       console.error(error);
@@ -874,22 +844,6 @@ const App = () => {
     setPendingClaudeGuesser(false);
     requestClaude({ team: game.currentTurn, role: 'guesser' });
   }, [game.currentTurn, game.lastClue, isBusy, pendingClaudeGuesser, roleControl, requestClaude]);
-
-  const retryWithHigherTemperature = () => {
-    if (!jsonParseError) return;
-
-    const newTemperature = jsonParseError.currentTemperature * 1.2;
-
-    // Request Claude again with the same team and role
-    requestClaude({
-      team: jsonParseError.team,
-      role: jsonParseError.role,
-      apiConfigOverride: {
-        ...(apiConfig ?? DEFAULT_API_CONFIG),
-        temperature: String(newTemperature)
-      }
-    });
-  };
 
   const updateRoleControl = (team, role, value) => {
     setRoleControl((prev) =>
@@ -989,12 +943,6 @@ const App = () => {
   const isSetupValid =
     (guessersAreHuman && spymastersAreClaude) ||
     (guessersAreClaude && spymastersAreHuman);
-  const lastClaudePayload = lastClaudeResult?.payload ?? null;
-  const claudeNotes =
-    typeof lastClaudePayload?.notes === 'string' ? lastClaudePayload.notes.trim() : '';
-  const claudeReveal = Array.isArray(lastClaudePayload?.reveal)
-    ? lastClaudePayload.reveal
-    : [];
 
   const handleStartGame = () => {
     if (!isSetupValid) return;
@@ -1114,14 +1062,69 @@ const App = () => {
                     selectedCardId={selectedCardId}
                   />
                   <div className="game-actions">
-                    <div className="legend">
-                      {Object.entries(TEAM_COLORS).map(([team, color]) => (
-                        <span key={team} className="legend-item">
-                          <span className="legend-dot" style={{ background: color }} />
-                          {team}
-                        </span>
-                      ))}
-                    </div>
+                    {isHumanGuesserTurn && !isGameOver && (() => {
+                      const teamClues = game.history.filter(
+                        entry => entry.type === 'clue' && entry.team === game.currentTurn
+                      );
+                      const showAiThinking = isBusy && isClaudeSelection(roleControl[game.currentTurn]?.spymaster);
+
+                      if (teamClues.length === 0 && !showAiThinking) return null;
+
+                      const currentClue = teamClues.find(entry =>
+                        game.lastClue &&
+                        game.lastClue.team === game.currentTurn &&
+                        game.lastClue.clue === entry.clue
+                      );
+                      const previousClues = teamClues.filter(entry => entry !== currentClue);
+
+                      return (
+                        <>
+                          <div className="game-actions__header">
+                            <h3>Clues for {game.currentTurn} team</h3>
+                            <div className="legend">
+                              {Object.entries(TEAM_COLORS).map(([team, color]) => (
+                                <span key={team} className="legend-item">
+                                  <span className="legend-dot" style={{ background: color }} />
+                                  {team}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <ul className="clues-list">
+                            {showAiThinking && (
+                              <li className="clue-item clue-item--loading">
+                                <span className="clue-word">AI Request in progress</span>
+                              </li>
+                            )}
+                            {currentClue && (
+                              <li className="clue-item clue-item--current">
+
+                                <span className="clue-word">{currentClue.clue}</span>
+                                <span className="clue-count" style={{ background: `var(--team-${game.currentTurn})` }}>{currentClue.count}</span>
+
+                              </li>
+                            )}
+                            {previousClues.length > 0 && (
+                              <>
+                                <li className="clue-section-divider">
+                                  <span className="clue-section-label">PREVIOUS CLUES</span>
+                                </li>
+                                <li className="clues-list-previous-wrapper">
+                                  <ul className="clues-list-previous">
+                                    {previousClues.map((entry, index) => (
+                                      <li key={index} className="clue-item clue-item--previous">
+                                        <span className="clue-word">{entry.clue}</span>
+                                        <span className="clue-count" style={{ background: `var(--team-${entry.team})` }}>{entry.count}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </li>
+                              </>
+                            )}
+                          </ul>
+                        </>
+                      );
+                    })()}
                     <div className="game-actions__bar">
                       <div className="game-actions__meta">
                         <span className={`pill ${game.currentTurn}`}>
@@ -1146,16 +1149,24 @@ const App = () => {
                       {!isHumanSpymasterTurn &&
                         isClaudeSelection(roleControl[game.currentTurn]?.spymaster) && (
                           <div className="game-actions__buttons">
-                            <button
-                              type="button"
-                              className="game-action-button game-action-button--claude"
-                              onClick={() =>
-                                requestClaude({ team: game.currentTurn, role: 'spymaster' })
-                              }
-                              disabled={isBusy || isGameOver}
-                            >
-                              Ask your AI for a clue
-                            </button>
+                            {(!game.lastClue || game.lastClue.team !== game.currentTurn) && (
+                              <button
+                                type="button"
+                                className={`game-action-button game-action-button--claude ${askAiClueClicked ? 'game-action-button--confirm' : ''}`}
+                                onClick={() => {
+                                  if (!askAiClueClicked) {
+                                    setAskAiClueClicked(true);
+                                    setTimeout(() => setAskAiClueClicked(false), 3000);
+                                  } else {
+                                    setAskAiClueClicked(false);
+                                    requestClaude({ team: game.currentTurn, role: 'spymaster' });
+                                  }
+                                }}
+                                disabled={isBusy || isGameOver}
+                              >
+                                {askAiClueClicked ? 'Click again to confirm' : 'Ask your AI for a clue'}
+                              </button>
+                            )}
                             <button
                               type="button"
                               className="game-action-button game-action-button--sample"
@@ -1189,7 +1200,7 @@ const App = () => {
                                 )
                               }
                             >
-                              End turn early
+                              End turn
                             </button>
                           </div>
                         )}
@@ -1224,95 +1235,6 @@ const App = () => {
                         </button>
                       </form>
                     )}
-                    <div className="claude-response">
-                      {isBusy ? (
-                        <div className="status">{statusMessage}</div>
-                      ) : statusMessage && (statusMessage.includes('error') || statusMessage.includes('Error') || statusMessage.includes('failed')) ? (
-                        <div className="status validation-warning">{statusMessage}</div>
-                      ) : lastClaudeResult ? (
-                        <>
-                          <div className="claude-response__header">
-                            <div className="claude-response__title">
-                              <h3>Your AI's response</h3>
-                              <span className={`pill ${lastClaudeResult.team}`}>
-                                {lastClaudeResult.team} team
-                              </span>
-                              {lastClaudePayload?.clue && (
-                                <>
-                                  <span className="claude-response__clue">{lastClaudePayload.clue}</span>
-                                  {typeof lastClaudePayload?.count === 'number' && (
-                                    <span className="claude-response__count">{lastClaudePayload.count}</span>
-                                  )}
-                                </>
-                              )}
-                            </div>
-                            <span className="pill">
-                              {lastClaudeResult.source === 'fake' ? 'Sample' : 'Live'}
-                            </span>
-                          </div>
-                          {(claudeReveal.length > 0 || typeof lastClaudePayload?.endTurn === 'boolean') && (
-                            <dl className="claude-response__list">
-                              {claudeReveal.length > 0 && (
-                                <>
-                                  <dt>Reveal</dt>
-                                  <dd>{claudeReveal.join(', ')}</dd>
-                                </>
-                              )}
-                              {typeof lastClaudePayload?.endTurn === 'boolean' && (
-                                <>
-                                  <dt>End turn</dt>
-                                  <dd>{lastClaudePayload.endTurn ? 'Yes' : 'No'}</dd>
-                                </>
-                              )}
-                            </dl>
-                          )}
-                          {claudeNotes && (
-                            <div className="claude-response__notes">
-                              <button
-                                type="button"
-                                className="secondary spoiler-button"
-                                onClick={() =>
-                                  setClaudeNotesVisible((prev) => !prev)
-                                }
-                              >
-                                {claudeNotesVisible ? 'Hide notes' : 'Show notes'}
-                              </button>
-                              {claudeNotesVisible && (
-                                <p>
-                                  <strong>Notes:</strong> {claudeNotes}
-                                </p>
-                              )}
-                            </div>
-                          )}
-                        </>
-                      ) : jsonParseError ? (
-                        <div className="claude-response__error">
-                          <div className="claude-response__header">
-                            <div className="claude-response__title">
-                              <h3>JSON Parsing Error</h3>
-                              <span className={`pill ${jsonParseError.team}`}>
-                                {jsonParseError.team} team
-                              </span>
-                            </div>
-                          </div>
-                          <p className="error-message">
-                            Your AI's response could not be parsed as valid JSON. The response may be too creative or unstructured.
-                          </p>
-                          <details className="error-details">
-                            <summary>Show raw response</summary>
-                            <pre className="error-response-text">{jsonParseError.messageText}</pre>
-                          </details>
-                          <button
-                            type="button"
-                            className="primary retry-button"
-                            onClick={retryWithHigherTemperature}
-                            disabled={isBusy}
-                          >
-                            Retry with {Math.round(jsonParseError.currentTemperature * 1.2 * 100) / 100} temperature (+20%)
-                          </button>
-                        </div>
-                      ) : null}
-                    </div>
                   </div>
                 </section>
               </main>

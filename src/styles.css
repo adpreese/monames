@@ -644,6 +644,162 @@ small {
   align-items: center;
 }
 
+.previous-clues {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  padding: 0.75rem 1rem;
+  margin: 0.5rem 0;
+}
+
+.previous-clues h3 {
+  font-size: 0.95rem;
+  margin: 0 0 0.5rem 0;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.clues-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.clues-list-previous {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.clues-list-previous-wrapper {
+  width: 100%;
+  list-style: none;
+}
+
+.clue-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  background: rgba(148, 163, 184, 0.05);
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  border: 1px solid transparent;
+}
+
+.clue-item--current {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: var(--accent);
+  border-width: 2px;
+  padding: 0.45rem 0.6rem;
+}
+
+.clue-item--previous {
+  opacity: 0.7;
+  background: rgba(148, 163, 184, 0.03);
+  display: inline-flex;
+  width: auto;
+}
+
+.clue-item--previous .clue-word {
+  font-weight: 500;
+}
+
+.clue-item--previous .clue-count {
+  opacity: 0.8;
+}
+
+.clue-item--previous .clue-source {
+  display: none;
+}
+
+.clue-section-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 0;
+  margin: 0.3rem 0;
+  list-style: none;
+  position: relative;
+}
+
+.clue-section-divider::before,
+.clue-section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.clue-section-label {
+  padding: 0 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.clue-item--loading {
+  color: var(--muted);
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.clue-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.4rem;
+  background: var(--accent);
+  color: white;
+  border-radius: 0.3rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.clue-word {
+  font-weight: 600;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.clue-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  background: var(--accent);
+  color: white;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.clue-source {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-left: auto;
+}
+
 .game-actions {
   border-radius: 1rem;
   border: 1px solid var(--border);
@@ -651,6 +807,21 @@ small {
   padding: 0.65rem 0.75rem;
   display: grid;
   gap: 0.75rem;
+}
+
+.game-actions__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.game-actions h3 {
+  font-size: 0.95rem;
+  margin: 0;
+  color: var(--muted);
+  font-weight: 600;
 }
 
 .game-actions__bar {
@@ -695,6 +866,27 @@ small {
   background: color-mix(in srgb, var(--action-claude) 90%, black);
 }
 
+.game-action-button--confirm {
+  border-color: var(--accent);
+  background: var(--accent);
+  animation: pulse-button 1s ease-in-out infinite;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+.game-action-button--confirm:hover {
+  border-color: color-mix(in srgb, var(--accent) 90%, black);
+  background: color-mix(in srgb, var(--accent) 90%, black);
+}
+
+@keyframes pulse-button {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
 .game-action-button--sample {
   border-color: var(--muted);
   background: var(--muted);
@@ -715,10 +907,6 @@ small {
 .game-action-button--end-turn:hover {
   border-color: color-mix(in srgb, var(--action-warning) 90%, black);
   background: color-mix(in srgb, var(--action-warning) 90%, black);
-}
-
-.game-actions .claude-response {
-  margin-top: 0;
 }
 
 .pill {
@@ -749,132 +937,6 @@ small {
   align-items: center;
   justify-content: center;
   flex: 1;
-}
-
-.claude-response {
-  margin-top: 0;
-  padding: 0.75rem;
-  border-radius: 0.75rem;
-  border: 1px dashed color-mix(in srgb, var(--accent) 35%, var(--border));
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  min-height: 100px;
-}
-
-.claude-response__header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  justify-content: space-between;
-}
-
-.claude-response__header h3 {
-  margin: 0;
-}
-
-.claude-response__title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.claude-response__clue {
-  font-weight: 600;
-  color: var(--text);
-}
-
-.claude-response__count {
-  font-weight: 600;
-  color: var(--text);
-}
-
-.claude-response__list {
-  display: grid;
-  grid-template-columns: minmax(70px, 100px) 1fr;
-  gap: 0.35rem 0.6rem;
-  margin: 0;
-}
-
-.claude-response__list dt {
-  font-weight: 600;
-  color: var(--muted);
-}
-
-.claude-response__list dd {
-  margin: 0;
-}
-
-.claude-response__notes {
-  margin: 0;
-  color: var(--muted);
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.claude-response__notes p {
-  margin: 0;
-}
-
-.spoiler-button {
-  align-self: flex-start;
-}
-
-.claude-response__error {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.error-message {
-  margin: 0;
-  padding: 0.75rem;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 0.5rem;
-  color: var(--text);
-  font-weight: 500;
-}
-
-.error-details {
-  margin: 0;
-  padding: 0.75rem;
-  background: rgba(148, 163, 184, 0.08);
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-}
-
-.error-details summary {
-  cursor: pointer;
-  font-weight: 600;
-  user-select: none;
-  padding: 0.25rem;
-}
-
-.error-details summary:hover {
-  color: var(--accent);
-}
-
-.error-response-text {
-  margin: 0.75rem 0 0 0;
-  padding: 0.75rem;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  font-size: 0.85rem;
-  overflow-x: auto;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  color: var(--text);
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.retry-button {
-  align-self: flex-start;
-  font-weight: 600;
 }
 
 .endgame-overlay {

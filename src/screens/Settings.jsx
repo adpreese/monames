@@ -19,21 +19,16 @@ const emptyPersonaForm = {
 };
 
 const ANTHROPIC_MODELS = [
-  'claude-sonnet-4-5-20250929',
-  'claude-3-5-sonnet-20240620',
-  'claude-3-opus-20240229',
-  'claude-3-haiku-20240307'
+  'claude-sonnet-4-6',
+  'claude-opus-4-6'
 ];
 
-const OPENAI_MODELS = ['gpt-4o', 'gpt-4o-mini', 'o1-mini', 'o1-preview', 'gpt-4.1'];
+const OPENAI_MODELS = ['gpt-5.2'];
 
 const OPENROUTER_MODELS = [
-  'anthropic/claude-sonnet-4-5',
-  'anthropic/claude-3.5-sonnet',
-  'openai/gpt-4o',
-  'openai/gpt-4o-mini',
-  'google/gemini-pro-1.5',
-  'meta-llama/llama-3.1-70b-instruct'
+  'anthropic/claude-opus-4.6',
+  'anthropic/claude-sonnet-4.6',
+  'z-ai/glm-5'
 ];
 
 const REASONING_EFFORT_OPTIONS = [
